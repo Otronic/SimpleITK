@@ -20,7 +20,7 @@
 #if SWIGCSHARP
 %include "enumtypesafe.swg" // csharp/enums.swg can not parse the templated code in PixelIDValueEnum
 %include "arrays_csharp.i"
-%include "std_string.i"
+%include "std_string_utf8.i"
 %include "CSharpTypemapHelper.i"
 
 
