@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>@DOTNET_TFM@</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <Platforms>x64</Platforms>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <LangVersion>@DOTNET_LANG@</LangVersion>
+        <AssemblyVersion>@SimpleITK_VERSION_CSHARP_AssemblyVersion@</AssemblyVersion>
+        <Version>@SimpleITK_VERSION_CSHARP_AssemblyVersion@</Version>
+        <Title>@PROJECT_NAME@ C# @CSHARP_PLATFORM@ wrapper @SimpleITK_VERSION@</Title>
+        <Copyright>Copyright NumFOCUS, Apache License, Version 2.0</Copyright>
+        <RepositoryUrl>https://github.com/Otronic/SimpleITK</RepositoryUrl>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <Content Include="$<TARGET_FILE:SimpleITKDotnetNative>">
+         <PackagePath>runtimes/@DOTNET_RID@/native/%(Filename)%(Extension)</PackagePath>
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+          <Pack>true</Pack>
+      </Content>
+    </ItemGroup>
+
+</Project>
