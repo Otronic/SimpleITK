@@ -22,7 +22,7 @@
 
 // Use STL support
 %include <std_vector.i>
-%include <std_string.i>
+%include <std_string_utf8.i>
 %include <std_map.i>
 #if SWIGPYTHON || SWIGRUBY
 %include <std_complex.i>
