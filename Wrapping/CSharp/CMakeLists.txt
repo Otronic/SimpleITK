@@ -1,3 +1,13 @@
+option(BUILD_DOTNET "Build .NET Library" ON)
+set(BUILD_DOTNET ON)
+message(STATUS "Build .Net: ${BUILD_DOTNET}")
+
+if (BUILD_DOTNET)
+  add_subdirectory(dotnet)
+  return()
+endif ()
+
+
 include("${CMAKE_CURRENT_SOURCE_DIR}/../../CMake/sitkCMakeInit.cmake")
 cmake_minimum_required(VERSION ${SITK_CMAKE_MINIMUM_REQUIRED_VERSION}...${SITK_CMAKE_POLICY_VERSION})
 
