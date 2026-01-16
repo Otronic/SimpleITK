@@ -57,8 +57,15 @@ endif ()
 set(SWIG_LIB_DIR "${SWIG_DIR}/Lib")
 set(SWIG_CSHARP_LIB_DIR "${SWIG_DIR}/Lib/csharp")
 message(STATUS "SWIG Lib directory: ${SWIG_LIB_DIR}")
+
+if (WIN32)
+    set(SWIG_EXTRA_ARGS)
+elseif (UNIX)
+    set(SWIG_EXTRA_ARGS -DSWIGWORDSIZE64)
+endif ()
+
 set(CMAKE_SWIG_FLAGS -I${CMAKE_CURRENT_SOURCE_DIR} -namespace \"itk.simple\" ${CMAKE_SWIG_GLOBAL_FLAGS} ${CMAKE_SWIG_FLAGS}
-        -I"${SWIG_CSHARP_LIB_DIR}" -I"${SWIG_LIB_DIR}")
+        -I"${SWIG_CSHARP_LIB_DIR}" -I"${SWIG_LIB_DIR}" ${SWIG_EXTRA_ARGS})
 # set swig target
 set(SWIG_MODULE_TARGET_NAME SimpleITK_SWIG_DOTNET_CODE)
 
@@ -99,7 +106,20 @@ else ()
 endif ()
 
 # Needed by dotnet/CMakeLists.txt
-set(DOTNET_PACKAGE SimpleITKDotnetUnmanaged)
+set(DOTNET_PACKAGE_BASE SimpleITKDotnetUnmanaged)
+
+# Add platform-specific suffix to package name
+if (APPLE)
+    set(DOTNET_PACKAGE_SUFFIX "macOS")
+elseif (UNIX)
+    set(DOTNET_PACKAGE_SUFFIX "Linux")
+elseif (WIN32)
+    set(DOTNET_PACKAGE_SUFFIX "Win")
+else ()
+    set(DOTNET_PACKAGE_SUFFIX "")
+endif ()
+
+set(DOTNET_PACKAGE ${DOTNET_PACKAGE_BASE}${DOTNET_PACKAGE_SUFFIX})
 set(DOTNET_PACKAGES_DIR "${PROJECT_BINARY_DIR}/dotnet/packages")
 file(MAKE_DIRECTORY ${DOTNET_PACKAGES_DIR})
 set(DOTNET_PROJECT ${DOTNET_PACKAGE})
@@ -165,8 +185,11 @@ add_library(SimpleITKDotnetNative SHARED "")
 
 target_link_libraries(SimpleITKDotnetNative PRIVATE ${SWIG_MODULE_TARGET_NAME})
 set_target_properties(SimpleITKDotnetNative PROPERTIES
-        PREFIX ""
         POSITION_INDEPENDENT_CODE ON)
+# On Windows, remove the "lib" prefix; on Unix/Linux, keep it
+if(WIN32)
+    set_target_properties(SimpleITKDotnetNative PROPERTIES PREFIX "")
+endif()
 set_target_properties(SimpleITKDotnetNative PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${DOTNET_SOURCE_DIRECTORY})
 # note: macOS is APPLE and also UNIX !
 if (APPLE)
@@ -240,8 +263,9 @@ endif ()
 # *.csproj.in contains:
 # CMake variable(s) (@PROJECT_NAME@) that configure_file() can manage and
 # generator expression ($<TARGET_FILE:...>) that file(GENERATE) can manage.
+# Use base package name for the template, but generate with platform-specific name
 configure_file(
-        ${PROJECT_SOURCE_DIR}/${DOTNET_PACKAGE}.csproj.in
+        ${PROJECT_SOURCE_DIR}/${DOTNET_PACKAGE_BASE}.csproj.in
         ${DOTNET_SOURCE_DIRECTORY}/${DOTNET_PACKAGE}.csproj.in
         @ONLY)
 
@@ -267,6 +291,7 @@ add_custom_command(
 #        ${PROJECT_BINARY_DIR}/dotnet/Directory.Build.props
         ${DOTNET_BINARY_DIRECTORY}/${DOTNET_PROJECT}.csproj
         ${SWIG_MODULE_TARGET_NAME}
+        SimpleITKDotnetNative
         BYPRODUCTS
         ${DOTNET_BINARY_DIRECTORY}/bin
         ${DOTNET_BINARY_DIRECTORY}/obj

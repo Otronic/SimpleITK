@@ -35,9 +35,15 @@ endif()
 #
 # C# SWIG configuration
 #
-if ( WRAP_CSHARP )
+
+if (WIN32)
+  if ( WRAP_CSHARP )
   add_subdirectory ( CSharp )
-endif()
+  endif()
+elseif (UNIX)
+  add_subdirectory ( CSharp )
+endif ()
+
 
 #
 # TCL SWIG configuration
