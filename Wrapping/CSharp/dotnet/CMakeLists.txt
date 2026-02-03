@@ -72,16 +72,16 @@ set(SWIG_MODULE_TARGET_NAME SimpleITK_SWIG_DOTNET_CODE)
 #######################
 ##  DOTNET Setting  ##
 #######################
-if(BUILD_DOTNET) # From https://github.com/Mizux/cmake-swig.git
+if (BUILD_DOTNET) # From https://github.com/Mizux/cmake-swig.git
     # Targeted Framework Moniker
     # see: https://docs.microsoft.com/en-us/dotnet/standard/frameworks
     # see: https://learn.microsoft.com/en-us/dotnet/standard/net-standard
     # .Net Core 3.1 LTS is not available for osx arm64
-    if(APPLE AND CMAKE_SYSTEM_PROCESSOR MATCHES "^(aarch64|arm64)")
+    if (APPLE AND CMAKE_SYSTEM_PROCESSOR MATCHES "^(aarch64|arm64)")
         set(USE_DOTNET_CORE_31 OFF)
-    else()
+    else ()
         option(USE_DOTNET_CORE_31 "Use .Net Core 3.1 LTS support" OFF)
-    endif()
+    endif ()
     message(STATUS ".Net: Use .Net Core 3.1 LTS support: ${USE_DOTNET_CORE_31}")
 
     option(USE_DOTNET_6 "Use .Net 6.0 LTS support" OFF)
@@ -90,12 +90,15 @@ if(BUILD_DOTNET) # From https://github.com/Mizux/cmake-swig.git
     option(USE_DOTNET_7 "Use .Net 7.0 support" OFF)
     message(STATUS ".Net: Use .Net 7.0 support: ${USE_DOTNET_7}")
 
-    option(USE_DOTNET_8 "Use .Net 8.0 LTS support" ON)
+    option(USE_DOTNET_8 "Use .Net 8.0 LTS support" OFF)
     message(STATUS ".Net: Use .Net 8.0 support: ${USE_DOTNET_8}")
 
     option(USE_DOTNET_9 "Use .Net 9.0 support" OFF)
     message(STATUS ".Net: Use .Net 9.0 support: ${USE_DOTNET_9}")
-endif()
+
+    option(USE_DOTNET_10 "Use .Net 10.0 support" ON)
+    message(STATUS ".Net: Use .Net 10.0 support: ${USE_DOTNET_10}")
+endif ()
 
 # Find dotnet cli
 find_program(DOTNET_EXECUTABLE NAMES dotnet)
@@ -171,6 +174,10 @@ if (USE_DOTNET_9)
     list(APPEND TFM "net9.0")
     set(DOTNET_LANG "13.0")
 endif ()
+if (USE_DOTNET_10)
+    list(APPEND TFM "net10.0")
+    set(DOTNET_LANG "14.0")
+endif ()
 
 list(LENGTH TFM TFM_LENGTH)
 if (TFM_LENGTH EQUAL "0")
@@ -187,9 +194,9 @@ target_link_libraries(SimpleITKDotnetNative PRIVATE ${SWIG_MODULE_TARGET_NAME})
 set_target_properties(SimpleITKDotnetNative PROPERTIES
         POSITION_INDEPENDENT_CODE ON)
 # On Windows, remove the "lib" prefix; on Unix/Linux, keep it
-if(WIN32)
+if (WIN32)
     set_target_properties(SimpleITKDotnetNative PROPERTIES PREFIX "")
-endif()
+endif ()
 set_target_properties(SimpleITKDotnetNative PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${DOTNET_SOURCE_DIRECTORY})
 # note: macOS is APPLE and also UNIX !
 if (APPLE)
@@ -271,7 +278,7 @@ configure_file(
 
 file(GENERATE
         OUTPUT ${DOTNET_SOURCE_DIRECTORY}/${DOTNET_PACKAGE}.csproj.in
-        INPUT ${DOTNET_SOURCE_DIRECTORY}/${DOTNET_PACKAGE}.csproj.in )
+        INPUT ${DOTNET_SOURCE_DIRECTORY}/${DOTNET_PACKAGE}.csproj.in)
 
 add_custom_command(
         OUTPUT ${DOTNET_BINARY_DIRECTORY}/${DOTNET_PROJECT}.csproj
@@ -288,7 +295,7 @@ add_custom_command(
         ${DOTNET_EXECUTABLE} pack --nologo -c Release -p:Platform=${DOTNET_PLATFORM} ${DOTNET_PROJECT}.csproj
         COMMAND ${CMAKE_COMMAND} -E touch ${DOTNET_BINARY_DIRECTORY}/timestamp
         DEPENDS
-#        ${PROJECT_BINARY_DIR}/dotnet/Directory.Build.props
+        #        ${PROJECT_BINARY_DIR}/dotnet/Directory.Build.props
         ${DOTNET_BINARY_DIRECTORY}/${DOTNET_PROJECT}.csproj
         ${SWIG_MODULE_TARGET_NAME}
         SimpleITKDotnetNative
